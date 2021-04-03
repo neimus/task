@@ -122,6 +122,21 @@ func main() {
 		entrypoint = filepath.Base(entrypoint)
 	} else {
 		entrypoint = "Taskfile.yml"
+		// by default, we use the current directory
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if _, err := os.Stat(filepath.Join(wd, entrypoint)); err != nil {
+			// if the file is not found in the current directory, then we try to find it in the user's home directory
+			hm, err := os.UserHomeDir()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if _, err := os.Stat(filepath.Join(hm, entrypoint)); err == nil {
+				dir = hm
+			}
+		}
 	}
 
 	e := task.Executor{
